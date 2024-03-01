@@ -28,6 +28,14 @@ impl Graphics {
             canvas
         }
     }
+
+
+    pub fn canvas(&self) -> &WindowCanvas {
+        &self.canvas
+    }
+    pub fn rendering_state(&self) -> &RenderingState {
+        &self.rendering_state
+    }
 }
 
 pub struct RenderingState {

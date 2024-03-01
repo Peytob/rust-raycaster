@@ -16,3 +16,7 @@ sdl2 = "0.36.0"
 
 # ECS
 ecs_rust = "0.0.4"
+
+# Math
+glm = "0.2.3"
+num-traits = "0.2.18"
