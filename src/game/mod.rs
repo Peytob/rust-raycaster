@@ -1,22 +1,26 @@
-use std::time::Duration;
+mod graphics;
+mod game_state;
+mod ecs;
+
+use ecs_rust::world::World;
 use sdl2::{EventPump, Sdl};
-use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use crate::game::graphic::Graphics;
+use crate::game::ecs::component::player_flag_component::PlayerFlagComponent;
+use crate::game::ecs::component::position_component::PositionComponent;
+use crate::game::ecs::system::moving_system::MovingSystem;
+use crate::game::game_state::GameState;
+use crate::game::graphics::Graphics;
 
-mod graphic;
-
-#[must_use]
 pub struct Game {
-    running_flag: bool,
     graphics: Graphics,
     event_pump: EventPump,
-}
+    world: World,
 
-trait GameModule {
+    game_state: GameState
 }
 
 impl Game {
+
     pub fn initialize_game(sdl_context: Sdl) -> Game {
         log::info!("Initializing game");
 
@@ -25,33 +29,57 @@ impl Game {
 
         log::info!("Game has been initialized");
 
+        log::info!("Initializing ECS world");
+
+        let world = Game::create_ecs_world();
+
+        log::info!("ECS world has been initialized");
+
         Game {
-            running_flag: true,
             graphics,
-            event_pump
+            event_pump,
+            world,
+
+            game_state: GameState::new()
         }
     }
 
-    pub fn run_game_loop(mut self) {
-        log::info!("Starting game cycle");
+    fn create_ecs_world() -> World {
+        let mut world = World::new();
 
-        'running: loop {
-            self.handle_window_events();
+        // Registering components
+        world
+            .register_component::<PositionComponent>()
+            .register_component::<PlayerFlagComponent>();
 
-            if (self.running_flag == false) {
-                break 'running
+        // Creating systems
+        world
+            // Input and events handling systems
+            .add_system(MovingSystem::new());
+
+        world
+    }
+
+    pub fn run_game_loop(&mut self) {
+
+        'main_game_loop: loop {
+            self.handle_events();
+
+            self.world.update();
+
+            if !self.game_state.is_game_running() {
+                break 'main_game_loop;
             }
         }
-
-        log::info!("Exiting from game cycle");
     }
 
-    fn handle_window_events(&mut self) {
+    fn handle_events(&mut self) {
         for event in self.event_pump.poll_iter() {
+            use sdl2::event::Event;
+
             match event {
-                Event::Quit {..} |
-                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    self.running_flag = false
+                Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    self.game_state.set_is_game_running(false)
                 },
 
                 _ => {}

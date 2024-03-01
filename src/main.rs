@@ -1,8 +1,6 @@
 mod game;
 
 use env_logger::Env;
-use sdl2::Sdl;
-
 use crate::game::Game;
 
 fn main() {
@@ -13,7 +11,7 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     log::info!("SDL context has been initialized");
 
-    let game = Game::initialize_game(sdl_context);
+    let mut game = Game::initialize_game(sdl_context);
     game.run_game_loop()
 }
 
