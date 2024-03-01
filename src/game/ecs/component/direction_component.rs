@@ -1,12 +1,11 @@
 use ecs_rust::component::Component;
-use glm::Vec2;
 
 pub struct DirectionComponent {
-    pub direction: Vec2
+    pub direction: f32 // Angle
 }
 
 impl DirectionComponent {
-    pub fn new(direction: Vec2) -> Self {
+    pub fn new(direction: f32) -> Self {
         Self { direction }
     }
 }

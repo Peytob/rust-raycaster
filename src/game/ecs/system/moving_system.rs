@@ -2,7 +2,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use ecs_rust::entity_manager::{EntityIdAccessor, EntityManager};
 use ecs_rust::system::System;
-use glm::normalize;
 use num_traits::Zero;
 use sdl2::EventPump;
 use sdl2::keyboard::Scancode;
@@ -50,7 +49,6 @@ impl MovingSystem {
 
         if !rotation_difference.is_zero() {
             direction_component.direction = direction_component.direction + rotation_difference;
-            direction_component.direction = normalize(direction_component.direction);
         }
 
         if !moving_difference.is_zero() {

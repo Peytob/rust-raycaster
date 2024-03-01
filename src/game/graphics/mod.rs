@@ -1,10 +1,12 @@
+use std::cell::RefCell;
+use std::rc::Rc;
 use sdl2::render::WindowCanvas;
 use sdl2::Sdl;
 
 #[must_use]
 pub struct Graphics {
-    canvas: WindowCanvas,
-    rendering_state: RenderingState
+    canvas: Rc<RefCell<WindowCanvas>>,
+    rendering_state: Rc<RefCell<RenderingState>>
 }
 
 impl Graphics {
@@ -19,21 +21,20 @@ impl Graphics {
             .build()
             .unwrap();
 
-        let mut canvas = window.into_canvas().build().unwrap();
+        let canvas = window.into_canvas().build().unwrap();
 
         log::info!("Initializing graphics module has been initialized");
 
         return Graphics {
             rendering_state: RenderingState::new(),
-            canvas
+            canvas: Rc::new(RefCell::new(canvas))
         }
     }
 
-
-    pub fn canvas(&self) -> &WindowCanvas {
+    pub fn canvas(&self) -> &Rc<RefCell<WindowCanvas>> {
         &self.canvas
     }
-    pub fn rendering_state(&self) -> &RenderingState {
+    pub fn rendering_state(&self) -> &Rc<RefCell<RenderingState>> {
         &self.rendering_state
     }
 }
@@ -43,9 +44,11 @@ pub struct RenderingState {
 }
 
 impl RenderingState {
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> Rc<RefCell<Self>> {
+        let rendering_state = Self {
             fov: 100.0
-        }
+        };
+
+        Rc::new(RefCell::new(rendering_state))
     }
 }
