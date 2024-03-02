@@ -1,11 +1,15 @@
+pub mod model;
+pub mod ecs;
+mod renderer;
+
 use std::cell::RefCell;
 use std::rc::Rc;
-use sdl2::render::WindowCanvas;
 use sdl2::Sdl;
+use crate::game::graphics::renderer::Renderer;
 
 #[must_use]
 pub struct Graphics {
-    canvas: Rc<RefCell<WindowCanvas>>,
+    renderer: Rc<RefCell<Renderer>>,
     rendering_state: Rc<RefCell<RenderingState>>
 }
 
@@ -22,31 +26,36 @@ impl Graphics {
             .unwrap();
 
         let canvas = window.into_canvas().build().unwrap();
+        let canvas_ref = Rc::new(RefCell::new(canvas));
 
         log::info!("Initializing graphics module has been initialized");
 
         return Graphics {
             rendering_state: RenderingState::new(),
-            canvas: Rc::new(RefCell::new(canvas))
+            renderer: Rc::new(RefCell::new(Renderer::new(&canvas_ref)))
         }
     }
 
-    pub fn canvas(&self) -> &Rc<RefCell<WindowCanvas>> {
-        &self.canvas
-    }
+
     pub fn rendering_state(&self) -> &Rc<RefCell<RenderingState>> {
         &self.rendering_state
+    }
+
+    pub fn renderer(&self) -> &Rc<RefCell<Renderer>> {
+        &self.renderer
     }
 }
 
 pub struct RenderingState {
-    fov: f32
+
+    // Maximal rendering distance
+    rendering_distance: f32
 }
 
 impl RenderingState {
     pub fn new() -> Rc<RefCell<Self>> {
         let rendering_state = Self {
-            fov: 100.0
+            rendering_distance: 5.0
         };
 
         Rc::new(RefCell::new(rendering_state))

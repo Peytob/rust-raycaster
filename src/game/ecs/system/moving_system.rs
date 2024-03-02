@@ -16,6 +16,8 @@ pub struct MovingSystem {
     event_pump: Rc<RefCell<EventPump>>
 }
 
+// Can be decomposed
+
 impl MovingSystem {
 
     pub fn new(event_pump: &Rc<RefCell<EventPump>>) -> Self {
