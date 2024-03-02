@@ -18,6 +18,7 @@ use crate::game::event::events::Events;
 use crate::game::game_state::{GameState, Repositories};
 use crate::game::graphics::ecs::component::camera_component::CameraComponent;
 use crate::game::graphics::ecs::system::camera_position_sync_system::CameraPositionSyncSystem;
+use crate::game::graphics::ecs::system::rendering_clear_system::RenderingClearSystem;
 use crate::game::graphics::ecs::system::rendering_swapbuffers_system::RenderingSwapBuffersSystem;
 use crate::game::graphics::ecs::system::world_map_rendering_system::WorldMapRenderingSystem;
 use crate::game::graphics::ecs::system::world_rendering_system::WorldRenderingSystem;
@@ -39,16 +40,14 @@ impl Game {
     pub fn initialize_game(sdl_context: Sdl) -> Game {
         log::info!("Initializing game");
 
-        let mut graphics = Graphics::initialize_graphics(&sdl_context);
-        let event_pump = sdl_context.event_pump().unwrap();
+        let mut game_state = GameState::new();
 
-        log::info!("Game has been initialized");
+        let mut graphics = Graphics::initialize_graphics(&sdl_context, game_state.repositories());
+        let event_pump = sdl_context.event_pump().unwrap();
 
         let mut events = Events::new(event_pump);
 
         log::info!("Loading resources");
-
-        let mut game_state = GameState::new();
 
         Game::load_resources(game_state.repositories());
 
@@ -60,6 +59,8 @@ impl Game {
 
         log::info!("ECS world has been initialized");
 
+        log::info!("Game has been initialized");
+
             Game {
                 graphics,
                 events,
@@ -67,7 +68,7 @@ impl Game {
 
                 game_state
             }
-        }
+    }
 
         fn create_ecs_world(graphics: &mut Graphics, events: &mut Events, game_state: &mut GameState) -> World {
             let mut world = World::new();
@@ -86,6 +87,7 @@ impl Game {
                 .add_system(MovingSystem::new(&events.event_pump()))
 
                 // Graphic
+                .add_system(RenderingClearSystem::new(&graphics.renderer()))
                 .add_system(CameraPositionSyncSystem::new())
                 .add_system(WorldRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
                 .add_system(WorldMapRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
@@ -99,7 +101,7 @@ impl Game {
 
                 world.add_component_to_entity(player_entity_id, PositionComponent::new(vec2(3.0, 3.0)));
                 world.add_component_to_entity(player_entity_id, DirectionComponent::new(0.0f32));
-                world.add_component_to_entity(player_entity_id, CameraComponent::new(Camera::new(vec2(3.0, 3.0), 0.0f32, 95.0f32)));
+                world.add_component_to_entity(player_entity_id, CameraComponent::new(Camera::new(vec2(3.0, 3.0), 0.0f32, 90f32.to_radians())));
                 world.add_component_to_entity(player_entity_id, PlayerFlagComponent::new());
             }
 
@@ -122,6 +124,7 @@ impl Game {
 
         let tiles = vec![
             vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             vec![1, 0, 0, 0, 2, 2, 2, 0, 0, 1],
             vec![1, 0, 0, 0, 2, 0, 2, 0, 0, 1],

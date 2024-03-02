@@ -64,6 +64,10 @@ impl Tilemap {
             .get_mut(position.y as usize)
             .map(|row| row[position.x as usize] = PlacedTile::new(tile_id));
     }
+
+    pub fn sizes(&self) -> UVec2 {
+        self.sizes
+    }
 }
 
 impl Resource for Tilemap {

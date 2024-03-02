@@ -5,7 +5,10 @@ mod renderer;
 use std::cell::RefCell;
 use std::rc::Rc;
 use sdl2::Sdl;
+use crate::game::game_state::Repositories;
 use crate::game::graphics::renderer::Renderer;
+use crate::game::model::repository::Repository;
+use crate::game::model::tile::Tile;
 
 #[must_use]
 pub struct Graphics {
@@ -15,7 +18,7 @@ pub struct Graphics {
 
 impl Graphics {
 
-    pub fn initialize_graphics(sdl_context: &Sdl) -> Graphics {
+    pub fn initialize_graphics(sdl_context: &Sdl, repositories: &Repositories) -> Graphics {
         log::info!("Initializing graphics module");
 
         let video_subsystem = sdl_context.video().unwrap();
@@ -32,7 +35,7 @@ impl Graphics {
 
         return Graphics {
             rendering_state: RenderingState::new(),
-            renderer: Rc::new(RefCell::new(Renderer::new(&canvas_ref)))
+            renderer: Rc::new(RefCell::new(Renderer::new(&canvas_ref, &repositories.tiles_repository())))
         }
     }
 

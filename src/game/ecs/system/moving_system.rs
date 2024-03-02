@@ -9,8 +9,8 @@ use crate::game::ecs::component::direction_component::DirectionComponent;
 use crate::game::ecs::component::player_flag_component::PlayerFlagComponent;
 use crate::game::ecs::component::position_component::PositionComponent;
 
-const PLAYER_MOVING_SPEED: f32 = 0.5f32; // Tiles
-const PLAYER_ROTATION_SPEED: f32 = 0.05f32;
+const PLAYER_MOVING_SPEED: f32 = 0.05f32; // Tiles
+const PLAYER_ROTATION_SPEED: f32 = 0.087f32; // Radians (~5 deg)
 
 pub struct MovingSystem {
     event_pump: Rc<RefCell<EventPump>>
@@ -40,8 +40,8 @@ impl MovingSystem {
 
         for scancode in self.event_pump.borrow_mut().keyboard_state().pressed_scancodes() {
             match scancode {
-                Scancode::A => { rotation_difference += PLAYER_ROTATION_SPEED }
-                Scancode::D => { rotation_difference -= PLAYER_ROTATION_SPEED }
+                Scancode::A => { rotation_difference -= PLAYER_ROTATION_SPEED }
+                Scancode::D => { rotation_difference += PLAYER_ROTATION_SPEED }
                 Scancode::W => { moving_difference += PLAYER_MOVING_SPEED }
                 Scancode::S => { moving_difference -= PLAYER_MOVING_SPEED }
 
@@ -54,7 +54,8 @@ impl MovingSystem {
         }
 
         if !moving_difference.is_zero() {
-            position_component.position = position_component.position + direction_component.direction * moving_difference;
+            position_component.position.x = position_component.position.x + direction_component.direction.cos() * moving_difference;
+            position_component.position.y = position_component.position.y + direction_component.direction.sin() * moving_difference;
         }
 
         // info!("Dif: rotation {}; moving {}", rotation_difference, moving_difference);
