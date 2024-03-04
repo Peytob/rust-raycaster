@@ -1,6 +1,7 @@
 pub mod model;
 pub mod ecs;
 mod renderer;
+mod ray_caster;
 
 use std::cell::RefCell;
 use std::rc::Rc;

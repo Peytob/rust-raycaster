@@ -1,24 +1,16 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use glm::{uvec2, UVec2, vec2, Vec2, Vec3, vec3};
+use glm::{uvec2, UVec2, Vec2};
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 use crate::game::graphics::model::camera::Camera;
+use crate::game::graphics::ray_caster::{cast_ray, Hit, relative_ray_angle};
 use crate::game::graphics::RenderingState;
 use crate::game::model::is_exists_resource;
 use crate::game::model::repository::Repository;
 use crate::game::model::tile::Tile;
 use crate::game::model::tilemap::{PlacedTile, Tilemap};
-
-enum Hit {
-    None,
-
-    Wall {
-        color: Vec3,
-        distance: f32
-    }
-}
 
 pub struct Renderer {
     canvas: Rc<RefCell<WindowCanvas>>,
@@ -65,23 +57,21 @@ impl Renderer {
 
         // Rendering throwing camera rays
         {
-            let fov = camera.fov();
+            // Todo CastRays method
+
             let total_columns = 30;
 
             for column in 0..total_columns {
-                let ray_angle = camera_direction + self.relative_ray_angle(column, total_columns);
+                let ray_angle = camera_direction + relative_ray_angle(column, total_columns);
 
-                let distance = match self.cast_ray(tilemap, camera_position, ray_angle, rendering_state.rendering_distance) {
-                    Hit::None => { rendering_state.rendering_distance }
-                    Hit::Wall { color: _color, distance } => { distance }
+                match cast_ray(tilemap, camera_position, ray_angle, rendering_state.rendering_distance) {
+                    Hit::None { ray } => {
+                        self.draw_2d_line(&camera_position, &ray.end_position(), &tile_size, Color::BLACK)
+                    }
+                    Hit::Wall { placed_tile, ray } => {
+                        self.draw_2d_line(&camera_position, &ray.end_position(), &tile_size, Color::BLACK)
+                    }
                 };
-
-                let to = vec2(
-                    camera_position.x + distance * ray_angle.cos(),
-                    camera_position.y + distance * ray_angle.sin()
-                );
-
-                self.draw_2d_line(&camera_position, &to, &tile_size, Color::BLACK)
             }
         }
     }
@@ -94,33 +84,6 @@ impl Renderer {
 
     pub fn show(&self) {
         self.canvas.borrow_mut().present();
-    }
-
-    fn cast_ray(&self, tilemap: &Tilemap, start_position: Vec2, ray_angle: f32, maximal_distance: f32) -> Hit {
-        // Todo Use binary algorithm with dynamic step size
-
-        let mut distance = 0.0f32;
-        let step_size = 0.05;
-        let mut current_position = start_position.clone();
-
-        while distance < maximal_distance {
-            current_position.x += step_size * ray_angle.cos();
-            current_position.y += step_size * ray_angle.sin();
-
-            let current_tile = uvec2(current_position.x as u32, current_position.y as u32);
-
-            if current_tile.x < 0 || current_tile.x >= tilemap.sizes().x || current_tile.y < 0 || current_tile.y >= tilemap.sizes().y {
-                return Hit::Wall { color: vec3(1f32, 0f32, 0f32), distance }
-            }
-
-            if tilemap.get_tile(current_tile).is_some_and(|tile| is_exists_resource(tile.tile_id()) ) {
-                return Hit::Wall { color: vec3(1f32, 0f32, 0f32), distance }
-            }
-
-            distance += step_size;
-        }
-
-        Hit::None
     }
 
     fn render_placed_tile_2d(&self, tile_position: &UVec2, tile_size: &UVec2, placed_tile: &PlacedTile) {
@@ -173,8 +136,5 @@ impl Renderer {
                 (to.y * tile_size.y as f32) as i32
             )
         ).unwrap()
-    }
-    fn relative_ray_angle(&self, column: i32, total_columns: i32) -> f32 {
-        ((column as f32) / (total_columns as f32)) - 0.5f32
     }
 }
