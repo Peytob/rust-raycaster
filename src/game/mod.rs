@@ -13,6 +13,7 @@ use crate::game::ecs::component::direction_component::DirectionComponent;
 use crate::game::ecs::component::player_flag_component::PlayerFlagComponent;
 use crate::game::ecs::component::position_component::PositionComponent;
 use crate::game::ecs::component::tilemap_component::TilemapComponent;
+use crate::game::ecs::system::collision_resolving_system::CollisionResolvingSystem;
 use crate::game::ecs::system::moving_system::MovingSystem;
 use crate::game::event::events::Events;
 use crate::game::game_state::{GameState, Repositories};
@@ -85,6 +86,7 @@ impl Game {
             world
                 // Input and events handling systems
                 .add_system(MovingSystem::new(&events.event_pump()))
+                .add_system(CollisionResolvingSystem::new(&game_state.repositories().tilemap_repository()))
 
                 // Graphic
                 .add_system(RenderingClearSystem::new(&graphics.renderer()))

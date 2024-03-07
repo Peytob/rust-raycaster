@@ -17,7 +17,7 @@ impl System for CameraPositionSyncSystem {
         let camera_ids = accessor.borrow_ids_for_triple::<CameraComponent, PositionComponent, DirectionComponent>(manager).unwrap();
 
         for camera_entity_id in camera_ids {
-            let (mut camera_component, position_component, direction_component) = manager
+            let (camera_component, position_component, direction_component) = manager
                 .borrow_component_triple_mut::<CameraComponent, PositionComponent, DirectionComponent>(*camera_entity_id).unwrap();
 
             let camera = camera_component.camera_mut();

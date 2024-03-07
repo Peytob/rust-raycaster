@@ -8,8 +8,6 @@ use std::rc::Rc;
 use sdl2::Sdl;
 use crate::game::game_state::Repositories;
 use crate::game::graphics::renderer::Renderer;
-use crate::game::model::repository::Repository;
-use crate::game::model::tile::Tile;
 
 #[must_use]
 pub struct Graphics {

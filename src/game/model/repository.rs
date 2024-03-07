@@ -14,7 +14,7 @@ impl<T : Resource> Repository<T> {
         Self { data: HashMap::with_capacity(32) }
     }
 
-    pub fn get_resource(&self, id: ResourceId) -> Option<&T> {
+    pub fn get_resource(&self, id: &ResourceId) -> Option<&T> {
         self.data.get(&id)
     }
 

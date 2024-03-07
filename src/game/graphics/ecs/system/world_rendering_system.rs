@@ -47,8 +47,7 @@ impl System for WorldRenderingSystem {
                     let tilemap_id = manager
                         .borrow_component::<TilemapComponent>(*tilemap_entity_id)
                         .unwrap()
-                        .tilemap()
-                        .clone();
+                        .tilemap();
 
                     let tilemap = tilemap_repository.get_resource(tilemap_id).unwrap();
 

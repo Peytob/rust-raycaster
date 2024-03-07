@@ -17,7 +17,7 @@ impl RenderingClearSystem {
 }
 
 impl System for RenderingClearSystem {
-    fn update(&mut self, manager: &mut EntityManager, accessor: &mut EntityIdAccessor) {
+    fn update(&mut self, _manager: &mut EntityManager, _accessor: &mut EntityIdAccessor) {
         self.renderer.borrow_mut().clear();
     }
 }
