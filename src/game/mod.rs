@@ -4,6 +4,7 @@ mod ecs;
 mod event;
 mod model;
 
+use std::rc::Rc;
 use std::time::Duration;
 use ecs_rust::world::World;
 use glm::vec2;
@@ -115,27 +116,34 @@ impl Game {
     fn load_resources(repositories: &Repositories) {
         // TODO Load resources from file
 
-        repositories.tiles_repository().borrow_mut()
-            .register_resource(Tile::new(0, Color::WHITE))
-            .register_resource(Tile::new(1, Color::GREEN))
-            .register_resource(Tile::new(2, Color::RED))
-            .register_resource(Tile::new(3, Color::YELLOW));
+        let mut tiles_repository = repositories.tiles_repository().borrow_mut();
+
+        tiles_repository
+            .register_resource(Rc::new(Tile::new(0, Color::WHITE, false)))
+            .register_resource(Rc::new(Tile::new(1, Color::GREEN, true)))
+            .register_resource(Rc::new(Tile::new(2, Color::RED, true)))
+            .register_resource(Rc::new(Tile::new(3, Color::YELLOW, true)));
+
+        let air = tiles_repository.get_resource(&0).unwrap();
+        let green = tiles_repository.get_resource(&1).unwrap();
+        let red = tiles_repository.get_resource(&2).unwrap();
+        let yellow = tiles_repository.get_resource(&3).unwrap();
 
         let tiles = vec![
-            vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            vec![1, 0, 0, 0, 2, 3, 2, 0, 0, 1],
-            vec![1, 0, 0, 0, 3, 0, 2, 0, 0, 1],
-            vec![1, 0, 0, 0, 2, 3, 2, 0, 0, 1],
-            vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            vec![green, green, green, green, green, green, green, green, green, green],
+            vec![green, air,   air,   air,   air,   air,   air,   air,   air,   green],
+            vec![green, air,   air,   air,   air,   air,   air,   air,   air,   green],
+            vec![green, air,   air,   air,   red,   yellow,red,   air,   air,   green],
+            vec![green, air,   air,   air,   yellow,air,   red,   air,   air,   green],
+            vec![green, air,   air,   air,   red,   yellow,red,   air,   air,   green],
+            vec![green, air,   air,   air,   air,   air,   air,   air,   air,   green],
+            vec![green, air,   air,   air,   air,   air,   air,   air,   air,   green],
+            vec![green, air,   air,   air,   air,   air,   air,   air,   air,   green],
+            vec![green, green, green, green, green, green, green, green, green, green]
         ];
 
         repositories.tilemap_repository().borrow_mut()
-            .register_resource(Tilemap::from_raw_tilemap(1, tiles));
+            .register_resource(Rc::new(Tilemap::from_raw_tilemap(1, tiles)));
     }
 
         pub fn run_game_loop(&mut self) {

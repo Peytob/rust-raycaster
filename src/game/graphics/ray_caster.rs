@@ -1,7 +1,6 @@
 use glm::{uvec2, Vec2};
 
 use crate::game::graphics::RenderingState;
-use crate::game::model::is_exists_resource;
 use crate::game::model::tilemap::{PlacedTile, Tilemap};
 
 pub struct HitDetails {
@@ -102,7 +101,7 @@ pub fn cast_ray(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32, maximal
 
         let placed_tile = tilemap.get_tile(current_tile);
 
-        if placed_tile.is_some_and(|tile| is_exists_resource(tile.tile_id()) ) {
+        if placed_tile.is_some_and(|tile| tile.tile().is_collision_enabled() ) {
             let hit = Hit::Wall {
                 placed_tile: placed_tile.unwrap().clone(),
             };

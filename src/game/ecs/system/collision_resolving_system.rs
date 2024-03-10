@@ -9,7 +9,6 @@ use crate::game::ecs::component::direction_component::DirectionComponent;
 use crate::game::ecs::component::player_flag_component::PlayerFlagComponent;
 use crate::game::ecs::component::position_component::PositionComponent;
 use crate::game::ecs::component::tilemap_component::TilemapComponent;
-use crate::game::model::is_exists_resource;
 use crate::game::model::repository::Repository;
 use crate::game::model::tilemap::Tilemap;
 
@@ -27,7 +26,7 @@ impl CollisionResolvingSystem {
         let mut current_tile = uvec2(player_position.x as u32, player_position.y as u32);
         const COLLISION_RESOLUTION_STEP: f32 = 0.01f32;
 
-        while player_position.x > 0f32 && player_position.y > 0f32 && tilemap.get_tile(current_tile).is_some_and(|placed_tile| is_exists_resource(placed_tile.tile_id())) {
+        while player_position.x > 0f32 && player_position.y > 0f32 && tilemap.get_tile(current_tile).is_some_and(|placed_tile| placed_tile.tile().is_collision_enabled()) {
             player_position.x -= player_direction.cos() * COLLISION_RESOLUTION_STEP;
             player_position.y -= player_direction.sin() * COLLISION_RESOLUTION_STEP;
             current_tile = uvec2(player_position.x as u32, player_position.y as u32);

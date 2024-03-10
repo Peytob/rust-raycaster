@@ -12,9 +12,8 @@ pub fn render_tilemap_3d(tilemap: &Tilemap, rendering_state: &RenderingState, re
                 renderer.render_column(&ray, hit_details.column(), hit_details.total_columns(), &Color::WHITE);
             }
 
-            Hit::Wall { .. } => {
-                let color = Color::BLACK;
-                renderer.render_column(&ray, hit_details.column(), hit_details.total_columns(), &color);
+            Hit::Wall { placed_tile } => {
+                renderer.render_column(&ray, hit_details.column(), hit_details.total_columns(), &placed_tile.tile().color());
             }
         };
     }

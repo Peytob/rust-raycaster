@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 use crate::game::model::ResourceId;
 
 pub trait Resource {
@@ -6,7 +7,7 @@ pub trait Resource {
 }
 
 pub struct Repository<T : Resource> {
-    data: HashMap<ResourceId, T>
+    data: HashMap<ResourceId, Rc<T>>
 }
 
 impl<T : Resource> Repository<T> {
@@ -14,11 +15,11 @@ impl<T : Resource> Repository<T> {
         Self { data: HashMap::with_capacity(32) }
     }
 
-    pub fn get_resource(&self, id: &ResourceId) -> Option<&T> {
+    pub fn get_resource(&self, id: &ResourceId) -> Option<&Rc<T>> {
         self.data.get(&id)
     }
 
-    pub fn register_resource(&mut self, resource: T) -> &mut Self {
+    pub fn register_resource(&mut self, resource: Rc<T>) -> &mut Self {
         self.data.insert(resource.id(), resource);
         self
     }

@@ -7,7 +7,6 @@ use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 
 use crate::game::graphics::ray_caster::Ray;
-use crate::game::model::is_exists_resource;
 use crate::game::model::repository::Repository;
 use crate::game::model::tile::Tile;
 use crate::game::model::tilemap::PlacedTile;
@@ -38,11 +37,7 @@ impl Renderer {
         let tile_repository = self.tile_repository.borrow();
         let mut canvas = self.canvas.borrow_mut();
 
-        let color = if is_exists_resource(placed_tile.tile_id()) {
-            tile_repository.get_resource(&placed_tile.tile_id().clone()).unwrap().color()
-        } else {
-            Color::WHITE
-        };
+        let color = placed_tile.tile().color();
 
         canvas.set_draw_color(color);
 
@@ -104,7 +99,8 @@ impl Renderer {
         let column_x = (column_width * column) as i32;
 
         // Ceiling
-        canvas.set_draw_color(Color::BLACK);
+        const SKY_COLOR: Color = Color::RGB(135, 206, 235);
+        canvas.set_draw_color(SKY_COLOR);
         let ceiling_rect = Rect::new(
             column_x,
             0,

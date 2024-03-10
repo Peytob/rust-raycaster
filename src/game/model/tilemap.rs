@@ -1,20 +1,28 @@
+use std::rc::Rc;
 use glm::{UVec2, uvec2};
 
 use crate::game::model::repository::Resource;
 use crate::game::model::ResourceId;
+use crate::game::model::tile::Tile;
 
-#[derive(Copy, Clone)]
 pub struct PlacedTile {
-    tile_id: ResourceId
+    tile: Rc<Tile>
+}
+
+impl Clone for PlacedTile {
+    fn clone(&self) -> Self {
+        PlacedTile::new(&self.tile())
+    }
 }
 
 impl PlacedTile {
-    pub fn new(tile_id: ResourceId) -> Self {
-        Self { tile_id }
+    pub fn new(tile: &Rc<Tile>) -> Self {
+        Self { tile: tile.clone() }
     }
 
-    pub fn tile_id(&self) -> &ResourceId {
-        &self.tile_id
+
+    pub fn tile(&self) -> &Rc<Tile> {
+        &self.tile
     }
 }
 
@@ -25,8 +33,8 @@ pub struct Tilemap {
 }
 
 impl Tilemap {
-    pub fn new(id: ResourceId, sizes: UVec2, empty_filler_tile_id: ResourceId) -> Self {
-        let tiles = vec![vec![PlacedTile::new(empty_filler_tile_id); sizes.x as usize]; sizes.y as usize];
+    pub fn new(id: ResourceId, sizes: UVec2, empty_tile: &Rc<Tile>) -> Self {
+        let tiles = vec![vec![PlacedTile::new(empty_tile); sizes.x as usize]; sizes.y as usize];
         Self {
             id,
             tiles,
@@ -34,12 +42,12 @@ impl Tilemap {
         }
     }
 
-    pub fn from_raw_tilemap(id: ResourceId, raw_tilemap: Vec<Vec<ResourceId>>) -> Self {
+    pub fn from_raw_tilemap(id: ResourceId, raw_tilemap: Vec<Vec<&Rc<Tile>>>) -> Self {
         let sizes = uvec2(raw_tilemap.len() as u32, raw_tilemap.get(0).unwrap().len() as u32);
 
         let tiles = raw_tilemap.iter()
             .map(|row| row.iter()
-                .map(|resource_id| PlacedTile::new(resource_id.clone()))
+                .map(|tile| PlacedTile::new(tile))
                 .collect()
             )
             .collect();
@@ -58,10 +66,10 @@ impl Tilemap {
             .flatten()
     }
 
-    pub fn set_tile(&mut self, position: UVec2, tile_id: ResourceId) {
+    pub fn set_tile(&mut self, position: UVec2, tile: &Rc<Tile>) {
         self.tiles
             .get_mut(position.y as usize)
-            .map(|row| row[position.x as usize] = PlacedTile::new(tile_id));
+            .map(|row| row[position.x as usize] = PlacedTile::new(tile));
     }
 
     pub fn sizes(&self) -> UVec2 {
