@@ -27,7 +27,7 @@ impl CollisionResolvingSystem {
         let mut current_tile = uvec2(player_position.x as u32, player_position.y as u32);
         let collision_resolution_step = 0.01f32;
 
-        while tilemap.get_tile(current_tile).is_some_and(|placed_tile| is_exists_resource(placed_tile.tile_id())) {
+        while player_position.x > 0f32 && player_position.y > 0f32 && tilemap.get_tile(current_tile).is_some_and(|placed_tile| is_exists_resource(placed_tile.tile_id())) {
             player_position.x -= player_direction.cos() * collision_resolution_step;
             player_position.y -= player_direction.sin() * collision_resolution_step;
             current_tile = uvec2(player_position.x as u32, player_position.y as u32);

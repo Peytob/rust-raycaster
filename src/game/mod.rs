@@ -9,6 +9,7 @@ use ecs_rust::world::World;
 use glm::vec2;
 use sdl2::Sdl;
 use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
 use crate::game::ecs::component::direction_component::DirectionComponent;
 use crate::game::ecs::component::player_flag_component::PlayerFlagComponent;
 use crate::game::ecs::component::position_component::PositionComponent;
@@ -92,7 +93,7 @@ impl Game {
                 .add_system(RenderingClearSystem::new(&graphics.renderer()))
                 .add_system(CameraPositionSyncSystem::new())
                 .add_system(WorldRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
-                .add_system(WorldMapRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
+                // .add_system(WorldMapRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
                 .add_system(RenderingSwapBuffersSystem::new(&graphics.renderer()));
 
             // Creating entities
@@ -119,18 +120,18 @@ impl Game {
         // TODO Load resources from file
 
         repositories.tiles_repository().borrow_mut()
-            .register_resource(Tile::new(0))
-            .register_resource(Tile::new(1))
-            .register_resource(Tile::new(2))
-            .register_resource(Tile::new(3));
+            .register_resource(Tile::new(0, Color::WHITE))
+            .register_resource(Tile::new(1, Color::GREEN))
+            .register_resource(Tile::new(2, Color::RED))
+            .register_resource(Tile::new(3, Color::YELLOW));
 
         let tiles = vec![
             vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            vec![1, 0, 0, 0, 2, 2, 2, 0, 0, 1],
-            vec![1, 0, 0, 0, 2, 0, 2, 0, 0, 1],
-            vec![1, 0, 0, 0, 2, 2, 2, 0, 0, 1],
+            vec![1, 0, 0, 0, 2, 3, 2, 0, 0, 1],
+            vec![1, 0, 0, 0, 3, 0, 2, 0, 0, 1],
+            vec![1, 0, 0, 0, 2, 3, 2, 0, 0, 1],
             vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
