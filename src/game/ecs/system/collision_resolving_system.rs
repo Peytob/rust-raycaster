@@ -25,11 +25,11 @@ impl CollisionResolvingSystem {
 
     pub fn resolve_collision(&self, tilemap: &Tilemap, player_position: &mut Vec2, player_direction: &f32) {
         let mut current_tile = uvec2(player_position.x as u32, player_position.y as u32);
-        let collision_resolution_step = 0.01f32;
+        const COLLISION_RESOLUTION_STEP: f32 = 0.01f32;
 
         while player_position.x > 0f32 && player_position.y > 0f32 && tilemap.get_tile(current_tile).is_some_and(|placed_tile| is_exists_resource(placed_tile.tile_id())) {
-            player_position.x -= player_direction.cos() * collision_resolution_step;
-            player_position.y -= player_direction.sin() * collision_resolution_step;
+            player_position.x -= player_direction.cos() * COLLISION_RESOLUTION_STEP;
+            player_position.y -= player_direction.sin() * COLLISION_RESOLUTION_STEP;
             current_tile = uvec2(player_position.x as u32, player_position.y as u32);
         }
     }

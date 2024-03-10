@@ -1,18 +1,16 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use glm::{uvec2, UVec2, Vec2};
+use glm::{UVec2, Vec2};
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 
-use crate::game::graphics::model::camera::Camera;
-use crate::game::graphics::ray_caster::{cast_rays, Hit, Ray};
-use crate::game::graphics::RenderingState;
+use crate::game::graphics::ray_caster::Ray;
 use crate::game::model::is_exists_resource;
 use crate::game::model::repository::Repository;
 use crate::game::model::tile::Tile;
-use crate::game::model::tilemap::{PlacedTile, Tilemap};
+use crate::game::model::tilemap::PlacedTile;
 
 const TILE_SIZE: Vec2 = Vec2 { x: 32f32, y: 32f32 };
 
@@ -21,78 +19,9 @@ pub struct Renderer {
     tile_repository: Rc<RefCell<Repository<Tile>>>
 }
 
-const TC: u32 = 90;
-
 impl Renderer {
     pub fn new(canvas: &Rc<RefCell<WindowCanvas>>, tile_repository: &Rc<RefCell<Repository<Tile>>>) -> Self {
         Self { canvas: canvas.clone(), tile_repository: tile_repository.clone() }
-    }
-
-    pub fn render_tilemap(&self, tilemap: &Tilemap, rendering_state: &RenderingState, camera: &Camera) {
-        let total_columns = TC;
-
-        for (hit, hit_details) in cast_rays(tilemap, camera, rendering_state.rendering_distance, total_columns) {
-            match hit {
-                Hit::None { ray } => {
-                    self.draw_column(&ray, hit_details.column(), hit_details.total_columns(), &Color::WHITE);
-                }
-
-                Hit::Wall { placed_tile, ray } => {
-                    let color = self.tile_repository.borrow().get_resource(&placed_tile.tile_id()).unwrap().color().clone();
-                    self.draw_column(&ray, hit_details.column(), hit_details.total_columns(), &color);
-                }
-            };
-        }
-    }
-
-    pub fn render_tilemap_2d(&self, tilemap: &Tilemap, rendering_state: &RenderingState, camera: &Camera) {
-        // Todo send sizes
-
-        for x in 0..tilemap.sizes().x {
-            for y in 0..tilemap.sizes().y {
-                let tile_position = uvec2(x, y);
-                let tile = tilemap.get_tile(tile_position).unwrap();
-                self.render_placed_tile_2d(&tile_position, tile);
-            }
-        }
-
-        self.render_camera_2d(tilemap, camera, rendering_state)
-    }
-
-    pub fn render_camera_2d(&self, tilemap: &Tilemap, camera: &Camera, rendering_state: &RenderingState) {
-        let camera_position = camera.position();
-        self.render_point_2d(&camera_position, 10);
-
-        let camera_direction = camera.direction();
-
-        // Rendering camera direction red ray
-        {
-            let camera_direction_ray_len = 3.0;
-
-            let camera_direction_second_point = Vec2::new(
-                &camera_position.x + camera_direction_ray_len * camera_direction.cos(),
-                &camera_position.y + camera_direction_ray_len * camera_direction.sin(),
-            );
-
-            self.draw_2d_line(&camera_position, &camera_direction_second_point, &Color::RED);
-        }
-
-        // Rendering throwing camera rays
-        {
-            let total_columns = TC;
-
-            for (hit, _) in cast_rays(tilemap, camera, rendering_state.rendering_distance, total_columns) {
-                match hit {
-                    Hit::None { ray } => {
-                        self.draw_2d_line(&ray.start_position(), &ray.end_position(), &Color::BLACK)
-                    }
-
-                    Hit::Wall { placed_tile, ray } => {
-                        self.draw_2d_line(&ray.start_position(), &ray.end_position(), &Color::BLACK)
-                    }
-                };
-            }
-        }
     }
 
     pub fn clear(&self) {
@@ -105,14 +34,15 @@ impl Renderer {
         self.canvas.borrow_mut().present();
     }
 
-    fn render_placed_tile_2d(&self, tile_position: &UVec2, placed_tile: &PlacedTile) {
-        if !is_exists_resource(placed_tile.tile_id()) {
-            return;
-        }
-
+    pub fn render_2d_placed_tile(&self, tile_position: &UVec2, placed_tile: &PlacedTile) {
+        let tile_repository = self.tile_repository.borrow();
         let mut canvas = self.canvas.borrow_mut();
 
-        let color = self.tile_repository.borrow().get_resource(&placed_tile.tile_id().clone()).unwrap().color();
+        let color = if is_exists_resource(placed_tile.tile_id()) {
+            tile_repository.get_resource(&placed_tile.tile_id().clone()).unwrap().color()
+        } else {
+            Color::WHITE
+        };
 
         canvas.set_draw_color(color);
 
@@ -126,7 +56,7 @@ impl Renderer {
         canvas.fill_rect(tile_rect).unwrap();
     }
 
-    fn render_point_2d(&self, point_center: &Vec2, point_size: u32) {
+    pub fn render_2d_point(&self, point_center: &Vec2, point_size: u32) {
         let mut canvas = self.canvas.borrow_mut();
 
         let camera_point_rect = Rect::new(
@@ -140,7 +70,7 @@ impl Renderer {
         canvas.fill_rect(camera_point_rect).unwrap()
     }
 
-    fn draw_2d_line(&self, from: &Vec2, to: &Vec2, color: &Color) {
+    pub fn render_2d_line(&self, from: &Vec2, to: &Vec2, color: &Color) {
         let mut canvas = self.canvas.borrow_mut();
 
         canvas.set_draw_color(*color);
@@ -158,7 +88,7 @@ impl Renderer {
         ).unwrap()
     }
 
-    fn draw_column(&self, ray: &Ray, column: u32, total_column: u32, color: &Color) {
+    pub fn render_column(&self, ray: &Ray, column: u32, total_column: u32, color: &Color) {
         let mut canvas = self.canvas.borrow_mut();
 
         let (width, height) = canvas.window().size();
@@ -207,13 +137,13 @@ impl Renderer {
 
 fn compute_shaded_color(color: &Color, ray: &Ray) -> Color {
     let covered_distance = ray.distance() / ray.maximal_distance();
-    let shadow_activation_border = 0.25f32;
+    const SHADOW_ACTIVATION_BORDER: f32 = 0.25f32;
 
-    if covered_distance < shadow_activation_border {
+    if covered_distance < SHADOW_ACTIVATION_BORDER {
         return color.clone()
     }
 
-    let shadow_power = shadow_activation_border / covered_distance;
+    let shadow_power = SHADOW_ACTIVATION_BORDER / covered_distance;
 
     return Color::from((
         (color.r as f32 * shadow_power) as u8,

@@ -18,14 +18,12 @@ use crate::game::ecs::system::collision_resolving_system::CollisionResolvingSyst
 use crate::game::ecs::system::moving_system::MovingSystem;
 use crate::game::event::events::Events;
 use crate::game::game_state::{GameState, Repositories};
-use crate::game::graphics::ecs::component::camera_component::CameraComponent;
 use crate::game::graphics::ecs::system::camera_position_sync_system::CameraPositionSyncSystem;
 use crate::game::graphics::ecs::system::rendering_clear_system::RenderingClearSystem;
 use crate::game::graphics::ecs::system::rendering_swapbuffers_system::RenderingSwapBuffersSystem;
-use crate::game::graphics::ecs::system::world_map_rendering_system::WorldMapRenderingSystem;
-use crate::game::graphics::ecs::system::world_rendering_system::WorldRenderingSystem;
+use crate::game::graphics::ecs::system::tilemap_3d_rendering_system::Tilemap3DRenderingSystem;
+use crate::game::graphics::ecs::system::tilemap_2d_rendering_system::Tilemap2DRenderingSystem;
 use crate::game::graphics::Graphics;
-use crate::game::graphics::model::camera::Camera;
 use crate::game::model::tile::Tile;
 use crate::game::model::tilemap::Tilemap;
 
@@ -80,7 +78,6 @@ impl Game {
                 .register_component::<PositionComponent>()
                 .register_component::<DirectionComponent>()
                 .register_component::<TilemapComponent>()
-                .register_component::<CameraComponent>()
                 .register_component::<PlayerFlagComponent>();
 
             // Creating systems
@@ -91,9 +88,9 @@ impl Game {
 
                 // Graphic
                 .add_system(RenderingClearSystem::new(&graphics.renderer()))
-                .add_system(CameraPositionSyncSystem::new())
-                .add_system(WorldRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
-                // .add_system(WorldMapRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
+                .add_system(CameraPositionSyncSystem::new(graphics.rendering_state()))
+                .add_system(Tilemap3DRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
+                .add_system(Tilemap2DRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
                 .add_system(RenderingSwapBuffersSystem::new(&graphics.renderer()));
 
             // Creating entities
@@ -104,7 +101,6 @@ impl Game {
 
                 world.add_component_to_entity(player_entity_id, PositionComponent::new(vec2(3.0, 3.0)));
                 world.add_component_to_entity(player_entity_id, DirectionComponent::new(0.0f32));
-                world.add_component_to_entity(player_entity_id, CameraComponent::new(Camera::new(vec2(3.0, 3.0), 0.0f32, 90f32.to_radians())));
                 world.add_component_to_entity(player_entity_id, PlayerFlagComponent::new());
             }
 

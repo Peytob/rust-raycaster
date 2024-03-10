@@ -13,9 +13,8 @@ impl PlacedTile {
         Self { tile_id }
     }
 
-
-    pub fn tile_id(&self) -> ResourceId {
-        self.tile_id
+    pub fn tile_id(&self) -> &ResourceId {
+        &self.tile_id
     }
 }
 

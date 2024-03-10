@@ -1,17 +1,19 @@
 use glm::{uvec2, Vec2};
 
-use crate::game::graphics::model::camera::Camera;
+use crate::game::graphics::RenderingState;
 use crate::game::model::is_exists_resource;
 use crate::game::model::tilemap::{PlacedTile, Tilemap};
 
 pub struct HitDetails {
     column: u32,
-    total_columns: u32
+    total_columns: u32,
+    ray: Ray,
+    hit: Hit
 }
 
 impl HitDetails {
-    pub fn new(column: u32, total_columns: u32) -> Self {
-        Self { column, total_columns }
+    pub fn new(column: u32, total_columns: u32, ray: Ray, hit: Hit) -> Self {
+        Self { column, total_columns, ray, hit }
     }
     pub fn column(&self) -> u32 {
         self.column
@@ -19,16 +21,19 @@ impl HitDetails {
     pub fn total_columns(&self) -> u32 {
         self.total_columns
     }
+
+    pub fn ray(&self) -> &Ray {
+        &self.ray
+    }
+    pub fn hit(&self) -> &Hit {
+        &self.hit
+    }
 }
 
 pub enum Hit {
-    None {
-        ray: Ray
-    },
-
+    None,
     Wall {
         placed_tile: PlacedTile,
-        ray: Ray
     }
 }
 
@@ -62,50 +67,53 @@ impl Ray {
 }
 
 // TODO Return custom iterator with computing rays on .next() call instead of std::vec
-pub fn cast_rays(tilemap: &Tilemap, camera: &Camera, maximal_distance: f32, total_columns: u32) -> Vec<(Hit, HitDetails)> {
-    let camera_direction = camera.direction();
-    let camera_position = camera.position();
-    let mut hits_buffer = Vec::<(Hit, HitDetails)>::with_capacity(total_columns as usize);
+pub fn cast_rays(tilemap: &Tilemap, rendering_state: &RenderingState) -> Vec<HitDetails> {
+    let camera_direction = rendering_state.camera.direction();
+    let camera_position = rendering_state.camera.position();
+    let total_columns = rendering_state.total_columns();
+
+    let mut hits_buffer = Vec::<HitDetails>::with_capacity(total_columns as usize);
 
     for column in 0..total_columns {
         let ray_angle = camera_direction + relative_ray_angle(column, total_columns);
-        let hit = cast_ray(tilemap, camera_position, ray_angle, maximal_distance);
-        hits_buffer.push((hit, HitDetails::new(column, total_columns)));
+        let (ray, hit) = cast_ray(tilemap, camera_position, ray_angle, rendering_state.rendering_distance());
+        hits_buffer.push(HitDetails::new(column, total_columns, ray, hit));
     }
 
     return hits_buffer;
 }
 
-pub fn cast_ray(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32, maximal_distance: f32) -> Hit {
+pub fn cast_ray(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32, maximal_distance: f32) -> (Ray, Hit) {
     // Todo Use binary algorithm with dynamic step size
 
-    let step_size = 0.05;
+    const STEP_SIZE: f32 = 0.05;
 
     let mut ray = Ray::new(start_position, start_position.clone(), ray_angle, maximal_distance);
 
     while ray.distance < maximal_distance {
-        ray.end_position.x += step_size * ray_angle.cos();
-        ray.end_position.y += step_size * ray_angle.sin();
+        ray.end_position.x += STEP_SIZE * ray_angle.cos();
+        ray.end_position.y += STEP_SIZE * ray_angle.sin();
 
         let current_tile = uvec2(ray.end_position.x as u32, ray.end_position.y as u32);
 
         if current_tile.x >= tilemap.sizes().x || current_tile.y >= tilemap.sizes().y {
-            return Hit::None { ray }
+            break;
         }
 
         let placed_tile = tilemap.get_tile(current_tile);
 
         if placed_tile.is_some_and(|tile| is_exists_resource(tile.tile_id()) ) {
-            return Hit::Wall {
+            let hit = Hit::Wall {
                 placed_tile: placed_tile.unwrap().clone(),
-                ray,
-            }
+            };
+
+            return (ray, hit)
         }
 
-        ray.distance += step_size;
+        ray.distance += STEP_SIZE;
     }
 
-    Hit::None { ray }
+    return (ray, Hit::None);
 }
 
 pub fn relative_ray_angle(column: u32, total_columns: u32) -> f32 {

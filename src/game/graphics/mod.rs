@@ -2,11 +2,15 @@ pub mod model;
 pub mod ecs;
 mod renderer;
 mod ray_caster;
+mod tilemap_2d_render;
+mod tilemap_3d_render;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use glm::vec2;
 use sdl2::Sdl;
 use crate::game::game_state::Repositories;
+use crate::game::graphics::model::camera::Camera;
 use crate::game::graphics::renderer::Renderer;
 
 #[must_use]
@@ -51,15 +55,35 @@ impl Graphics {
 pub struct RenderingState {
 
     // Maximal rendering distance
-    rendering_distance: f32
+    rendering_distance: f32,
+
+    camera: Camera,
+
+    // Total columns in 3d graphics
+    total_columns: u32,
 }
 
 impl RenderingState {
     pub fn new() -> Rc<RefCell<Self>> {
         let rendering_state = Self {
-            rendering_distance: 5.0
+            rendering_distance: 5.0,
+            total_columns: 30,
+            camera: Camera::new(vec2(3.0, 3.0), 0.0f32, 90f32.to_radians())
         };
 
         Rc::new(RefCell::new(rendering_state))
+    }
+
+    pub fn rendering_distance(&self) -> f32 {
+        self.rendering_distance
+    }
+    pub fn camera(&self) -> &Camera {
+        &self.camera
+    }
+    pub fn camera_mut(&mut self) -> &mut Camera {
+        &mut self.camera
+    }
+    pub fn total_columns(&self) -> u32 {
+        self.total_columns
     }
 }
