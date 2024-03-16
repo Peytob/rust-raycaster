@@ -14,13 +14,13 @@ impl HitDetails {
     pub fn new(column: u32, total_columns: u32, ray: Ray, hit: Hit) -> Self {
         Self { column, total_columns, ray, hit }
     }
+
     pub fn column(&self) -> u32 {
         self.column
     }
     pub fn total_columns(&self) -> u32 {
         self.total_columns
     }
-
     pub fn ray(&self) -> &Ray {
         &self.ray
     }

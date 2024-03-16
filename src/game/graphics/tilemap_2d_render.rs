@@ -6,8 +6,6 @@ use crate::game::graphics::RenderingState;
 use crate::game::model::tilemap::Tilemap;
 
 pub fn render_tilemap_2d(tilemap: &Tilemap, rendering_state: &RenderingState, renderer: &Renderer) {
-    // Todo send sizes
-
     for x in 0..tilemap.sizes().x {
         for y in 0..tilemap.sizes().y {
             let tile_position = uvec2(x, y);

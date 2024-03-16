@@ -7,20 +7,17 @@ use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 
 use crate::game::graphics::ray_caster::Ray;
-use crate::game::model::repository::Repository;
-use crate::game::model::tile::Tile;
 use crate::game::model::tilemap::PlacedTile;
 
 const TILE_SIZE: Vec2 = Vec2 { x: 32f32, y: 32f32 };
 
 pub struct Renderer {
-    canvas: Rc<RefCell<WindowCanvas>>,
-    tile_repository: Rc<RefCell<Repository<Tile>>>
+    canvas: Rc<RefCell<WindowCanvas>>
 }
 
 impl Renderer {
-    pub fn new(canvas: &Rc<RefCell<WindowCanvas>>, tile_repository: &Rc<RefCell<Repository<Tile>>>) -> Self {
-        Self { canvas: canvas.clone(), tile_repository: tile_repository.clone() }
+    pub fn new(canvas: &Rc<RefCell<WindowCanvas>>) -> Self {
+        Self { canvas: canvas.clone() }
     }
 
     pub fn clear(&self) {
@@ -34,7 +31,6 @@ impl Renderer {
     }
 
     pub fn render_2d_placed_tile(&self, tile_position: &UVec2, placed_tile: &PlacedTile) {
-        let tile_repository = self.tile_repository.borrow();
         let mut canvas = self.canvas.borrow_mut();
 
         let color = placed_tile.tile().color();
@@ -46,6 +42,21 @@ impl Renderer {
             (tile_position.y as f32 * TILE_SIZE.y) as i32,
             TILE_SIZE.x as u32,
             TILE_SIZE.y as u32
+        );
+
+        canvas.fill_rect(tile_rect).unwrap();
+    }
+
+    pub fn render_2d_rect(&self, color: &Color, position: &Vec2, size: &Vec2) {
+        let mut canvas = self.canvas.borrow_mut();
+
+        canvas.set_draw_color(*color);
+
+        let tile_rect = Rect::new(
+            position.x as i32,
+            position.y as i32,
+            size.x as u32,
+            size.y as u32
         );
 
         canvas.fill_rect(tile_rect).unwrap();

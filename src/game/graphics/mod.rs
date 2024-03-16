@@ -4,6 +4,7 @@ mod renderer;
 mod ray_caster;
 mod tilemap_2d_render;
 mod tilemap_3d_render;
+mod linemap_2d_render;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -38,7 +39,7 @@ impl Graphics {
 
         return Graphics {
             rendering_state: RenderingState::new(),
-            renderer: Rc::new(RefCell::new(Renderer::new(&canvas_ref, &repositories.tiles_repository())))
+            renderer: Rc::new(RefCell::new(Renderer::new(&canvas_ref)))
         }
     }
 
@@ -66,7 +67,7 @@ pub struct RenderingState {
 impl RenderingState {
     pub fn new() -> Rc<RefCell<Self>> {
         let rendering_state = Self {
-            rendering_distance: 5.0,
+            rendering_distance: 7.0,
             total_columns: 30,
             camera: Camera::new(vec2(3.0, 3.0), 0.0f32, 90f32.to_radians())
         };

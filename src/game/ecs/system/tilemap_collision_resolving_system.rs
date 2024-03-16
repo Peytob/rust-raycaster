@@ -12,11 +12,11 @@ use crate::game::ecs::component::tilemap_component::TilemapComponent;
 use crate::game::model::repository::Repository;
 use crate::game::model::tilemap::Tilemap;
 
-pub struct CollisionResolvingSystem {
+pub struct TilemapCollisionResolvingSystem {
     tilemap_repository: Rc<RefCell<Repository<Tilemap>>>
 }
 
-impl CollisionResolvingSystem {
+impl TilemapCollisionResolvingSystem {
 
     pub fn new(tilemap_repository: &Rc<RefCell<Repository<Tilemap>>>) -> Self {
         Self { tilemap_repository: tilemap_repository.clone() }
@@ -36,19 +36,24 @@ impl CollisionResolvingSystem {
 
 // Can be decomposed
 
-impl CollisionResolvingSystem {
+impl TilemapCollisionResolvingSystem {
 
 }
 
-impl System for CollisionResolvingSystem {
+impl System for TilemapCollisionResolvingSystem {
     fn update(&mut self, manager: &mut EntityManager, accessor: &mut EntityIdAccessor) {
-        let tilemap_id = accessor
+        let tilemap_id_option = accessor
             .borrow_ids::<TilemapComponent>(manager)
             .map(|tilemap_ids| tilemap_ids.get(0))
             .flatten()
             .map(|tilemap_id| manager.borrow_component::<TilemapComponent>(*tilemap_id))
-            .flatten()
-            .unwrap()
+            .flatten();
+
+        if tilemap_id_option.is_none() {
+            return;
+        }
+
+        let tilemap_id = tilemap_id_option.unwrap()
             .tilemap()
             .clone();
 
