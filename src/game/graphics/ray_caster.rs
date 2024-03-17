@@ -3,7 +3,7 @@ use sdl2::pixels::Color;
 
 use crate::game::graphics::RenderingState;
 use crate::game::model::linemap::{Line, Linemap};
-use crate::game::model::tilemap::{PlacedTile, Tilemap};
+use crate::game::model::tilemap::Tilemap;
 
 pub struct HitDetails {
     column: u32,
@@ -34,7 +34,8 @@ impl HitDetails {
 pub enum Hit {
     None,
     Wall {
-        placed_tile: PlacedTile,
+        color: Color,
+        is_collision_enabled: bool
     }
 }
 
@@ -104,8 +105,10 @@ pub fn cast_ray_tilemap(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32,
         let placed_tile = tilemap.get_tile(current_tile);
 
         if placed_tile.is_some_and(|tile| tile.tile().is_collision_enabled() ) {
+            let placed_tile = placed_tile.unwrap();
             let hit = Hit::Wall {
-                placed_tile: placed_tile.unwrap().clone(),
+                color: placed_tile.tile().color().clone(),
+                is_collision_enabled: placed_tile.tile().is_collision_enabled()
             };
 
             return (ray, hit)
@@ -135,24 +138,32 @@ pub fn cast_rays_linemap(linemap: &Linemap, rendering_state: &RenderingState) ->
 
 pub fn cast_ray_linemap(linemap: &Linemap, start_position: Vec2, ray_angle: f32, maximal_distance: f32) -> (Ray, Hit) {
     let mut ray = Ray::new(start_position, start_position.clone(), ray_angle, maximal_distance);
+    ray.distance = maximal_distance;
 
     ray.end_position.x += maximal_distance * ray_angle.cos();
     ray.end_position.y += maximal_distance * ray_angle.sin();
 
     let ray_line = Line::new(Color::WHITE, ray.start_position.clone(), ray.end_position.clone());
+    let mut hit = Hit::None;
 
     for line in linemap.lines() {
         match Line::find_intersection(line, &ray_line) {
             None => {}
             Some(intersection) => {
-                if glm::distance(ray.start_position, intersection) < glm::distance(ray.start_position, ray.end_position) {
+                let intersection_distance = glm::distance(ray.start_position, intersection);
+                if intersection_distance < ray.distance {
                     ray.end_position = intersection;
+                    ray.distance = intersection_distance;
+                    hit = Hit::Wall {
+                        color: line.color().clone(),
+                        is_collision_enabled: true
+                    }
                 }
             }
         };
     }
 
-    return (ray, Hit::None)
+    return (ray, hit)
 }
 
 pub fn relative_ray_angle(column: u32, total_columns: u32) -> f32 {

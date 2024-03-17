@@ -19,6 +19,7 @@ use crate::game::event::events::Events;
 use crate::game::game_state::{GameState, Repositories};
 use crate::game::graphics::ecs::system::camera_position_sync_system::CameraPositionSyncSystem;
 use crate::game::graphics::ecs::system::linemap_2d_rendering_system::Linemap2DRenderingSystem;
+use crate::game::graphics::ecs::system::linemap_3d_rendering_system::Linemap3DRenderingSystem;
 use crate::game::graphics::ecs::system::rendering_clear_system::RenderingClearSystem;
 use crate::game::graphics::ecs::system::rendering_swapbuffers_system::RenderingSwapBuffersSystem;
 use crate::game::graphics::ecs::system::tilemap_2d_rendering_system::Tilemap2DRenderingSystem;
@@ -98,6 +99,7 @@ impl Game {
             .add_system(RenderingClearSystem::new(&graphics.renderer()))
             .add_system(CameraPositionSyncSystem::new(graphics.rendering_state()))
             .add_system(Tilemap3DRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
+            .add_system(Linemap3DRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().linemap_repository()))
             .add_system(Tilemap2DRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().tilemap_repository()))
             .add_system(Linemap2DRenderingSystem::new(&graphics.renderer(), &graphics.rendering_state(), game_state.repositories().linemap_repository()))
             .add_system(RenderingSwapBuffersSystem::new(&graphics.renderer()));

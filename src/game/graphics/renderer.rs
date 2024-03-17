@@ -6,7 +6,8 @@ use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 
-use crate::game::graphics::ray_caster::Ray;
+use crate::game::graphics::ray_caster::{Hit, HitDetails, Ray};
+use crate::game::graphics::RenderingState;
 use crate::game::model::tilemap::PlacedTile;
 
 const TILE_SIZE: Vec2 = Vec2 { x: 32f32, y: 32f32 };
@@ -157,4 +158,30 @@ fn compute_shaded_color(color: &Color, ray: &Ray) -> Color {
         (color.g as f32 * shadow_power) as u8,
         (color.b as f32 * shadow_power) as u8
     ));
+}
+
+pub fn render_hit_line(hit_details: &HitDetails, _rendering_state: &RenderingState, renderer: &Renderer) {
+    let ray = hit_details.ray();
+    match hit_details.hit() {
+        Hit::None => {
+            renderer.render_2d_line(&ray.start_position(), &ray.end_position(), &Color::BLACK)
+        }
+
+        Hit::Wall { .. } => {
+            renderer.render_2d_line(&ray.start_position(), &ray.end_position(), &Color::BLACK)
+        }
+    };
+}
+
+pub fn render_hit_column(hit_details: &HitDetails, _rendering_state: &RenderingState, renderer: &Renderer) {
+    let ray = hit_details.ray();
+    match hit_details.hit() {
+        Hit::None => {
+            renderer.render_column(&ray, hit_details.column(), hit_details.total_columns(), &Color::WHITE);
+        }
+
+        Hit::Wall { color, .. } => {
+            renderer.render_column(&ray, hit_details.column(), hit_details.total_columns(), &color);
+        }
+    };
 }

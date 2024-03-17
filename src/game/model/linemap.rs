@@ -61,33 +61,16 @@ impl Line {
 
     pub fn find_intersection(first: &Line, second: &Line) -> Option<Vec2> {
 
-        let intersection =
-        if is_parallel_y(first) {
+        let intersection = if is_parallel_y(first) {
             let intersection_x = first.from.x;
             Vec2::new(intersection_x, second.compute_at_x(intersection_x))
         } else if is_parallel_y(second) {
             let intersection_x = second.from.x;
             Vec2::new(intersection_x, first.compute_at_x(intersection_x))
-        } else
-        {
+        } else {
             let intersection_x = (second.b - first.b) / (first.k - second.k);
             Vec2::new(intersection_x, first.compute_at_x(intersection_x))
         };
-
-        // let intersection = if is_parallel_y(first) {
-        //     Vec2::new(first.from.x, second.compute_at_x(first.from.x))
-        // } else if is_parallel_y(second) {
-        //     Vec2::new(second.from.x, first.compute_at_x(second.from.x))
-        // } else {
-        //     let intersection_x = (second.b - first.b) / (first.k - second.k);
-        //     Vec2::new(intersection_x, first.compute_at_x(intersection_x))
-        // };
-
-        // if first.contains_x(intersection.x) && second.contains_x(intersection.x) {
-        //     return Some(intersection);
-        // }
-        //
-        // return None;
 
         if  !first.contains_x(intersection.x) ||
             !first.contains_y(intersection.y) ||

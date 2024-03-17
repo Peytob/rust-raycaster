@@ -1,7 +1,8 @@
 use glm::{uvec2, Vec2};
 use sdl2::pixels::Color;
-use crate::game::graphics::ray_caster::{cast_rays_tilemap, Hit};
-use crate::game::graphics::renderer::Renderer;
+
+use crate::game::graphics::ray_caster::cast_rays_tilemap;
+use crate::game::graphics::renderer::{render_hit_line, Renderer};
 use crate::game::graphics::RenderingState;
 use crate::game::model::tilemap::Tilemap;
 
@@ -35,19 +36,7 @@ pub fn render_camera_2d(tilemap: &Tilemap, rendering_state: &RenderingState, ren
         renderer.render_2d_line(&camera_position, &camera_direction_second_point, &Color::RED);
     }
 
-    // Rendering throwing camera rays
-    {
-        for hit_details in cast_rays_tilemap(tilemap, &rendering_state) {
-            let ray = hit_details.ray();
-            match hit_details.hit() {
-                Hit::None => {
-                    renderer.render_2d_line(&ray.start_position(), &ray.end_position(), &Color::BLACK)
-                }
-
-                Hit::Wall { .. } => {
-                    renderer.render_2d_line(&ray.start_position(), &ray.end_position(), &Color::BLACK)
-                }
-            };
-        }
+    for hit_details in cast_rays_tilemap(tilemap, &rendering_state) {
+        render_hit_line(&hit_details, rendering_state, renderer);
     }
 }
