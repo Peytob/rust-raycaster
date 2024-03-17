@@ -1,6 +1,8 @@
 use glm::{uvec2, Vec2};
+use sdl2::pixels::Color;
 
 use crate::game::graphics::RenderingState;
+use crate::game::model::linemap::{Line, Linemap};
 use crate::game::model::tilemap::{PlacedTile, Tilemap};
 
 pub struct HitDetails {
@@ -66,7 +68,7 @@ impl Ray {
 }
 
 // TODO Return custom iterator with computing rays on .next() call instead of std::vec
-pub fn cast_rays(tilemap: &Tilemap, rendering_state: &RenderingState) -> Vec<HitDetails> {
+pub fn cast_rays_tilemap(tilemap: &Tilemap, rendering_state: &RenderingState) -> Vec<HitDetails> {
     let camera_direction = rendering_state.camera.direction();
     let camera_position = rendering_state.camera.position();
     let total_columns = rendering_state.total_columns();
@@ -75,14 +77,14 @@ pub fn cast_rays(tilemap: &Tilemap, rendering_state: &RenderingState) -> Vec<Hit
 
     for column in 0..total_columns {
         let ray_angle = camera_direction + relative_ray_angle(column, total_columns);
-        let (ray, hit) = cast_ray(tilemap, camera_position, ray_angle, rendering_state.rendering_distance());
+        let (ray, hit) = cast_ray_tilemap(tilemap, camera_position, ray_angle, rendering_state.rendering_distance());
         hits_buffer.push(HitDetails::new(column, total_columns, ray, hit));
     }
 
     return hits_buffer;
 }
 
-pub fn cast_ray(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32, maximal_distance: f32) -> (Ray, Hit) {
+pub fn cast_ray_tilemap(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32, maximal_distance: f32) -> (Ray, Hit) {
     // Todo Use binary algorithm with dynamic step size
 
     const STEP_SIZE: f32 = 0.05;
@@ -113,6 +115,44 @@ pub fn cast_ray(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32, maximal
     }
 
     return (ray, Hit::None);
+}
+
+pub fn cast_rays_linemap(linemap: &Linemap, rendering_state: &RenderingState) -> Vec<HitDetails> {
+    let camera_direction = rendering_state.camera.direction();
+    let camera_position = rendering_state.camera.position();
+    let total_columns = rendering_state.total_columns();
+
+    let mut hits_buffer = Vec::<HitDetails>::with_capacity(total_columns as usize);
+
+    for column in 0..total_columns {
+        let ray_angle = camera_direction + relative_ray_angle(column, total_columns);
+        let (ray, hit) = cast_ray_linemap(linemap, camera_position, ray_angle, rendering_state.rendering_distance());
+        hits_buffer.push(HitDetails::new(column, total_columns, ray, hit));
+    }
+
+    return hits_buffer;
+}
+
+pub fn cast_ray_linemap(linemap: &Linemap, start_position: Vec2, ray_angle: f32, maximal_distance: f32) -> (Ray, Hit) {
+    let mut ray = Ray::new(start_position, start_position.clone(), ray_angle, maximal_distance);
+
+    ray.end_position.x += maximal_distance * ray_angle.cos();
+    ray.end_position.y += maximal_distance * ray_angle.sin();
+
+    let ray_line = Line::new(Color::WHITE, ray.start_position.clone(), ray.end_position.clone());
+
+    for line in linemap.lines() {
+        match Line::find_intersection(line, &ray_line) {
+            None => {}
+            Some(intersection) => {
+                if glm::distance(ray.start_position, intersection) < glm::distance(ray.start_position, ray.end_position) {
+                    ray.end_position = intersection;
+                }
+            }
+        };
+    }
+
+    return (ray, Hit::None)
 }
 
 pub fn relative_ray_angle(column: u32, total_columns: u32) -> f32 {

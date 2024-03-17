@@ -5,7 +5,7 @@ use ecs_rust::entity_manager::{EntityIdAccessor, EntityManager};
 use ecs_rust::system::System;
 
 use crate::game::ecs::component::linemap_component::LinemapComponent;
-use crate::game::graphics::linemap_2d_render::render_linemap_2d;
+use crate::game::graphics::linemap_2d_render::{render_camera_2d, render_linemap_2d};
 use crate::game::graphics::renderer::Renderer;
 use crate::game::graphics::RenderingState;
 use crate::game::model::linemap::Linemap;
@@ -42,7 +42,7 @@ impl System for Linemap2DRenderingSystem {
 
             let linemap = linemap_repository.get_resource(&linemap_id).unwrap();
             render_linemap_2d(linemap, &rendering_state, &renderer);
-            // render_camera_2d(linemap, &rendering_state, &renderer);
+            render_camera_2d(linemap, &rendering_state, &renderer);
         }
     }
 }
