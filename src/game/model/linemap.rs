@@ -2,6 +2,7 @@ use glm::{abs, Vec2};
 use num_traits::{zero, Zero};
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
+use crate::game::model::object_color::ObjectColor;
 
 use crate::game::model::repository::Resource;
 use crate::game::model::ResourceId;
@@ -9,7 +10,7 @@ use crate::game::model::ResourceId;
 const EPSILON: f32 = 0.005;
 
 pub struct Line {
-    color: Color,
+    color: ObjectColor,
     from: Vec2,
     to: Vec2,
     k: f32,
@@ -17,7 +18,7 @@ pub struct Line {
 }
 
 impl Line {
-    pub fn new(color: Color, from: Vec2, to: Vec2) -> Self {
+    pub fn new(color: ObjectColor, from: Vec2, to: Vec2) -> Self {
         let x_diff = from.x - to.x;
 
         let mut k = 0f32;
@@ -31,7 +32,7 @@ impl Line {
         Self { color, from, to, k, b }
     }
 
-    pub fn color(&self) -> &Color {
+    pub fn color(&self) -> &ObjectColor {
         &self.color
     }
     pub fn from(&self) -> &Vec2 {
@@ -105,7 +106,7 @@ impl Linemap {
         &self.sizes
     }
 
-    pub fn add_line(&mut self, color: Color, from: Vec2, to: Vec2) -> &mut Linemap {
+    pub fn add_line(&mut self, color: ObjectColor, from: Vec2, to: Vec2) -> &mut Linemap {
         let line = Line::new(color, from, to);
 
         self.sizes.x = line.from.x.max(self.sizes.x).max(line.to.x);
@@ -115,7 +116,7 @@ impl Linemap {
         return self;
     }
 
-    pub fn add_rect(&mut self, color: Color, rect: Rect) -> &mut Linemap {
+    pub fn add_rect(&mut self, color: ObjectColor, rect: Rect) -> &mut Linemap {
         self.add_line(color.clone(), point_to_vec2(rect.top_left()), point_to_vec2(rect.top_right()));
         self.add_line(color.clone(), point_to_vec2(rect.top_right()), point_to_vec2(rect.bottom_right()));
         self.add_line(color.clone(), point_to_vec2(rect.bottom_right()), point_to_vec2(rect.bottom_left()));

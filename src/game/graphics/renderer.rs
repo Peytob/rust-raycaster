@@ -8,6 +8,7 @@ use sdl2::render::WindowCanvas;
 
 use crate::game::graphics::ray_caster::{Hit, HitDetails, Ray};
 use crate::game::graphics::RenderingState;
+use crate::game::model::object_color::ObjectColor;
 use crate::game::model::tilemap::PlacedTile;
 
 const TILE_SIZE: Vec2 = Vec2 { x: 32f32, y: 32f32 };
@@ -36,7 +37,7 @@ impl Renderer {
 
         let color = placed_tile.tile().color();
 
-        canvas.set_draw_color(color);
+        // canvas.set_draw_color(color);
 
         let tile_rect = Rect::new(
             (tile_position.x as f32 * TILE_SIZE.x) as i32,
@@ -48,10 +49,10 @@ impl Renderer {
         canvas.fill_rect(tile_rect).unwrap();
     }
 
-    pub fn render_2d_rect(&self, color: &Color, position: &Vec2, size: &Vec2) {
+    pub fn render_2d_rect(&self, color: &ObjectColor, position: &Vec2, size: &Vec2) {
         let mut canvas = self.canvas.borrow_mut();
 
-        canvas.set_draw_color(*color);
+        // canvas.set_draw_color(*color);
 
         let tile_rect = Rect::new(
             position.x as i32,
@@ -77,10 +78,10 @@ impl Renderer {
         canvas.fill_rect(camera_point_rect).unwrap()
     }
 
-    pub fn render_2d_line(&self, from: &Vec2, to: &Vec2, color: &Color) {
+    pub fn render_2d_line(&self, from: &Vec2, to: &Vec2, color: &ObjectColor) {
         let mut canvas = self.canvas.borrow_mut();
 
-        canvas.set_draw_color(*color);
+        // canvas.set_draw_color(*color);
 
         canvas.draw_line(
             Point::new(
@@ -164,11 +165,11 @@ pub fn render_hit_line(hit_details: &HitDetails, _rendering_state: &RenderingSta
     let ray = hit_details.ray();
     match hit_details.hit() {
         Hit::None => {
-            renderer.render_2d_line(&ray.start_position(), &ray.end_position(), &Color::BLACK)
+            renderer.render_2d_line(&ray.start_position(), &ray.end_position(), &ObjectColor::BLACK)
         }
 
         Hit::Wall { .. } => {
-            renderer.render_2d_line(&ray.start_position(), &ray.end_position(), &Color::BLACK)
+            renderer.render_2d_line(&ray.start_position(), &ray.end_position(), &ObjectColor::BLACK)
         }
     };
 }

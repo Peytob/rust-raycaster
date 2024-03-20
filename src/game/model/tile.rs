@@ -1,21 +1,25 @@
 use sdl2::pixels::Color;
+use crate::game::model::object_color::ObjectColor;
 use crate::game::model::repository::Resource;
 use crate::game::model::ResourceId;
 
-#[derive(Copy, Clone)]
 pub struct Tile {
     id: ResourceId,
-    color: Color,
+    color: ObjectColor,
     is_collision_enabled: bool
 }
 
 impl Tile {
-    pub fn new(id: ResourceId, color: Color, is_collision_enabled: bool) -> Self {
-        Self { id, color, is_collision_enabled }
+    pub fn new(id: ResourceId, color: ObjectColor, is_collision_enabled: bool) -> Self {
+        Self {
+            id,
+            color,
+            is_collision_enabled
+        }
     }
 
-    pub fn color(&self) -> Color {
-        self.color
+    pub fn color(&self) -> &ObjectColor {
+        &self.color
     }
 
     pub fn is_collision_enabled(&self) -> bool {

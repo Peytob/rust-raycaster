@@ -3,6 +3,7 @@ use sdl2::pixels::Color;
 
 use crate::game::graphics::RenderingState;
 use crate::game::model::linemap::{Line, Linemap};
+use crate::game::model::object_color::ObjectColor;
 use crate::game::model::tilemap::Tilemap;
 
 pub struct HitDetails {
@@ -107,7 +108,7 @@ pub fn cast_ray_tilemap(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32,
         if placed_tile.is_some_and(|tile| tile.tile().is_collision_enabled() ) {
             let placed_tile = placed_tile.unwrap();
             let hit = Hit::Wall {
-                color: placed_tile.tile().color().clone(),
+                color: Color::BLACK,// placed_tile.tile().color().clone(),
                 is_collision_enabled: placed_tile.tile().is_collision_enabled()
             };
 
@@ -143,7 +144,7 @@ pub fn cast_ray_linemap(linemap: &Linemap, start_position: Vec2, ray_angle: f32,
     ray.end_position.x += maximal_distance * ray_angle.cos();
     ray.end_position.y += maximal_distance * ray_angle.sin();
 
-    let ray_line = Line::new(Color::WHITE, ray.start_position.clone(), ray.end_position.clone());
+    let ray_line = Line::new(ObjectColor::WHITE, ray.start_position.clone(), ray.end_position.clone());
     let mut hit = Hit::None;
 
     for line in linemap.lines() {
@@ -155,7 +156,7 @@ pub fn cast_ray_linemap(linemap: &Linemap, start_position: Vec2, ray_angle: f32,
                     ray.end_position = intersection;
                     ray.distance = intersection_distance;
                     hit = Hit::Wall {
-                        color: line.color().clone(),
+                        color: Color::BLACK, // line.color().clone(),
                         is_collision_enabled: true
                     }
                 }

@@ -4,9 +4,10 @@ use sdl2::pixels::Color;
 use crate::game::graphics::ray_caster::cast_rays_tilemap;
 use crate::game::graphics::renderer::{render_hit_line, Renderer};
 use crate::game::graphics::RenderingState;
+use crate::game::model::object_color::ObjectColor;
 use crate::game::model::tilemap::Tilemap;
 
-pub fn render_tilemap_2d(tilemap: &Tilemap, rendering_state: &RenderingState, renderer: &Renderer) {
+pub fn render_tilemap_2d(tilemap: &Tilemap, _rendering_state: &RenderingState, renderer: &Renderer) {
     for x in 0..tilemap.sizes().x {
         for y in 0..tilemap.sizes().y {
             let tile_position = uvec2(x, y);
@@ -33,7 +34,7 @@ pub fn render_camera_2d(tilemap: &Tilemap, rendering_state: &RenderingState, ren
             &camera_position.y + CAMERA_DIRECTION_RAY_LEN * camera_direction.sin(),
         );
 
-        renderer.render_2d_line(&camera_position, &camera_direction_second_point, &Color::RED);
+        renderer.render_2d_line(&camera_position, &camera_direction_second_point, &ObjectColor::RED);
     }
 
     for hit_details in cast_rays_tilemap(tilemap, &rendering_state) {

@@ -6,9 +6,10 @@ use crate::game::graphics::ray_caster::cast_rays_linemap;
 use crate::game::graphics::renderer::{render_hit_line, Renderer};
 use crate::game::graphics::RenderingState;
 use crate::game::model::linemap::Linemap;
+use crate::game::model::object_color::ObjectColor;
 
-pub fn render_linemap_2d(linemap: &Linemap, rendering_state: &RenderingState, renderer: &Renderer) {
-    renderer.render_2d_rect(&Color::WHITE, &zero(), &linemap.sizes());
+pub fn render_linemap_2d(linemap: &Linemap, _rendering_state: &RenderingState, renderer: &Renderer) {
+    renderer.render_2d_rect(&ObjectColor::WHITE, &zero(), &linemap.sizes());
 
     for line in linemap.lines() {
         renderer.render_2d_line(line.from(), line.to(), line.color())
@@ -32,7 +33,7 @@ pub fn render_camera_2d(linemap: &Linemap, rendering_state: &RenderingState, ren
             &camera_position.y + CAMERA_DIRECTION_RAY_LEN * camera_direction.sin(),
         );
 
-        renderer.render_2d_line(&camera_position, &camera_direction_second_point, &Color::RED);
+        renderer.render_2d_line(&camera_position, &camera_direction_second_point, &ObjectColor::RED);
     }
 
     for hit_details in cast_rays_linemap(linemap, &rendering_state) {
