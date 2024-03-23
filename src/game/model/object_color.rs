@@ -17,24 +17,28 @@ impl ObjectColor {
         color: &Color::BLACK
     };
 
+    pub const GRAY: ObjectColor = ObjectColor::COLOR {
+        color: &Color::GRAY
+    };
+
     pub const RED: ObjectColor = ObjectColor::COLOR {
         color: &Color::RED
     };
 
     pub const GREEN: ObjectColor = ObjectColor::COLOR {
-        color: &Color::RED
+        color: &Color::GREEN
     };
 
     pub const BLUE: ObjectColor = ObjectColor::COLOR {
-        color: &Color::RED
+        color: &Color::BLUE
     };
 
     pub const MAGENTA: ObjectColor = ObjectColor::COLOR {
-        color: &Color::RED
+        color: &Color::MAGENTA
     };
 
     pub const CYAN: ObjectColor = ObjectColor::COLOR {
-        color: &Color::RED
+        color: &Color::CYAN
     };
 
     pub const YELLOW: ObjectColor = ObjectColor::COLOR {

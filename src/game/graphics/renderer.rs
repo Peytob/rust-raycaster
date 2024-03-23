@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{RefCell, RefMut};
 use std::rc::Rc;
 
 use glm::{UVec2, Vec2};
@@ -37,8 +37,6 @@ impl Renderer {
 
         let color = placed_tile.tile().color();
 
-        // canvas.set_draw_color(color);
-
         let tile_rect = Rect::new(
             (tile_position.x as f32 * TILE_SIZE.x) as i32,
             (tile_position.y as f32 * TILE_SIZE.y) as i32,
@@ -46,13 +44,13 @@ impl Renderer {
             TILE_SIZE.y as u32
         );
 
-        canvas.fill_rect(tile_rect).unwrap();
+        draw_colored_rect(&mut canvas, &tile_rect, color)
     }
 
     pub fn render_2d_rect(&self, color: &ObjectColor, position: &Vec2, size: &Vec2) {
         let mut canvas = self.canvas.borrow_mut();
 
-        // canvas.set_draw_color(*color);
+        canvas.set_draw_color(*resolve_object_color(color));
 
         let tile_rect = Rect::new(
             position.x as i32,
@@ -81,7 +79,7 @@ impl Renderer {
     pub fn render_2d_line(&self, from: &Vec2, to: &Vec2, color: &ObjectColor) {
         let mut canvas = self.canvas.borrow_mut();
 
-        // canvas.set_draw_color(*color);
+        canvas.set_draw_color(*resolve_object_color(color));
 
         canvas.draw_line(
             Point::new(
@@ -96,7 +94,7 @@ impl Renderer {
         ).unwrap()
     }
 
-    pub fn render_column(&self, ray: &Ray, column: u32, total_column: u32, color: &Color) {
+    fn render_column(&self, ray: &Ray, column: u32, total_column: u32, color: &ObjectColor) {
         let mut canvas = self.canvas.borrow_mut();
 
         let (width, height) = canvas.window().size();
@@ -112,35 +110,54 @@ impl Renderer {
         let column_x = (column_width * column) as i32;
 
         // Ceiling
-        const SKY_COLOR: Color = Color::RGB(135, 206, 235);
-        canvas.set_draw_color(SKY_COLOR);
+        const SKY_COLOR: ObjectColor = ObjectColor::COLOR { color: &Color::RGB(135, 206, 235) };
         let ceiling_rect = Rect::new(
             column_x,
             0,
             column_width,
             wall_top
         );
-        canvas.fill_rect(ceiling_rect).unwrap();
+        draw_colored_rect(&mut canvas, &ceiling_rect, &SKY_COLOR);
 
         // Wall
-        canvas.set_draw_color(compute_shaded_color(color, ray));
         let column_rect = Rect::new(
             column_x,
             wall_top as i32,
             column_width,
             wall_bottom - wall_top
         );
-        canvas.fill_rect(column_rect).unwrap();
+        draw_colored_rect(&mut canvas, &column_rect, &color);
 
         // Floor
-        canvas.set_draw_color(Color::GRAY);
         let ceiling_rect = Rect::new(
             column_x,
             wall_bottom as i32,
             column_width,
             height - wall_bottom
         );
-        canvas.fill_rect(ceiling_rect).unwrap();
+        draw_colored_rect(&mut canvas, &ceiling_rect, &ObjectColor::GRAY);
+    }
+}
+
+fn draw_colored_rect(canvas: &mut WindowCanvas, rect: &Rect, color: &ObjectColor) {
+    match color {
+        ObjectColor::COLOR { color } => {
+            canvas.set_draw_color(**color);
+            canvas.fill_rect(*rect).unwrap();
+        }
+        ObjectColor::TEXTURE { .. } => {}
+    }
+}
+
+fn resolve_object_color(color: &ObjectColor) -> &'static Color {
+    return match color {
+        ObjectColor::COLOR { color } => {
+            color
+        }
+
+        ObjectColor::TEXTURE { .. } => {
+            &Color::BLACK
+        }
     }
 }
 
@@ -178,7 +195,7 @@ pub fn render_hit_column(hit_details: &HitDetails, _rendering_state: &RenderingS
     let ray = hit_details.ray();
     match hit_details.hit() {
         Hit::None => {
-            renderer.render_column(&ray, hit_details.column(), hit_details.total_columns(), &Color::WHITE);
+            renderer.render_column(&ray, hit_details.column(), hit_details.total_columns(), &ObjectColor::WHITE);
         }
 
         Hit::Wall { color, .. } => {

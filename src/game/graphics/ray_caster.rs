@@ -35,7 +35,7 @@ impl HitDetails {
 pub enum Hit {
     None,
     Wall {
-        color: Color,
+        color: ObjectColor,
         is_collision_enabled: bool
     }
 }
@@ -108,7 +108,7 @@ pub fn cast_ray_tilemap(tilemap: &Tilemap, start_position: Vec2, ray_angle: f32,
         if placed_tile.is_some_and(|tile| tile.tile().is_collision_enabled() ) {
             let placed_tile = placed_tile.unwrap();
             let hit = Hit::Wall {
-                color: Color::BLACK,// placed_tile.tile().color().clone(),
+                color: placed_tile.tile().color().clone(),
                 is_collision_enabled: placed_tile.tile().is_collision_enabled()
             };
 
@@ -156,7 +156,7 @@ pub fn cast_ray_linemap(linemap: &Linemap, start_position: Vec2, ray_angle: f32,
                     ray.end_position = intersection;
                     ray.distance = intersection_distance;
                     hit = Hit::Wall {
-                        color: Color::BLACK, // line.color().clone(),
+                        color: line.color().clone(),
                         is_collision_enabled: true
                     }
                 }
