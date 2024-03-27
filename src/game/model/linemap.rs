@@ -1,9 +1,8 @@
 use glm::{abs, Vec2};
 use num_traits::{zero, Zero};
-use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
-use crate::game::model::object_color::ObjectColor;
 
+use crate::game::model::object_color::ObjectColor;
 use crate::game::model::repository::Resource;
 use crate::game::model::ResourceId;
 

@@ -1,5 +1,4 @@
 use glm::{uvec2, Vec2};
-use sdl2::pixels::Color;
 
 use crate::game::graphics::ray_caster::cast_rays_tilemap;
 use crate::game::graphics::renderer::{render_hit_line, Renderer};

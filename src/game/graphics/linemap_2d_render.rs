@@ -1,6 +1,5 @@
 use glm::Vec2;
 use num_traits::zero;
-use sdl2::pixels::Color;
 
 use crate::game::graphics::ray_caster::cast_rays_linemap;
 use crate::game::graphics::renderer::{render_hit_line, Renderer};

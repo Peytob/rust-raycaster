@@ -1,4 +1,3 @@
-use sdl2::pixels::Color;
 use crate::game::model::object_color::ObjectColor;
 use crate::game::model::repository::Resource;
 use crate::game::model::ResourceId;

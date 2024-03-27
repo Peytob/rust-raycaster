@@ -1,4 +1,5 @@
 use std::rc::Rc;
+
 use glm::{UVec2, uvec2};
 
 use crate::game::model::repository::Resource;

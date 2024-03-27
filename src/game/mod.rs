@@ -3,9 +3,8 @@ use std::time;
 use std::time::Duration;
 
 use ecs_rust::world::World;
-use glm::{vec2, Vec2, Vec3};
+use glm::{vec2, Vec2};
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::Sdl;
 
@@ -26,7 +25,7 @@ use crate::game::graphics::ecs::system::rendering_swapbuffers_system::RenderingS
 use crate::game::graphics::ecs::system::tilemap_2d_rendering_system::Tilemap2DRenderingSystem;
 use crate::game::graphics::ecs::system::tilemap_3d_rendering_system::Tilemap3DRenderingSystem;
 use crate::game::graphics::Graphics;
-use crate::game::model::linemap::{Line, Linemap};
+use crate::game::model::linemap::Linemap;
 use crate::game::model::object_color::ObjectColor;
 use crate::game::model::tile::Tile;
 use crate::game::model::tilemap::Tilemap;
@@ -214,14 +213,14 @@ impl Game {
 
             // FPS stabilisation
 
-            const TARGET_FPS: u32 = 30;
-            const TIME_PER_FRAME_NANOS: u32 = 1_000_000_000 / TARGET_FPS;
+            const TARGET_FPS: i32 = 30;
+            const TIME_PER_FRAME_NANOS: i32 = 1_000_000_000 / TARGET_FPS;
 
-            let frame_diff_nanos = (frame_end_time - frame_start_time).as_nanos() as u32;
+            let frame_diff_nanos = (frame_end_time - frame_start_time).as_nanos() as i32;
             let wait_time = TIME_PER_FRAME_NANOS - frame_diff_nanos;
 
             if wait_time > 0 {
-                ::std::thread::sleep(Duration::new(0, wait_time));
+                ::std::thread::sleep(Duration::new(0, wait_time as u32));
             }
         }
     }

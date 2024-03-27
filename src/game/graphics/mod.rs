@@ -1,3 +1,14 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use glm::vec2;
+use sdl2::image::{InitFlag, LoadTexture};
+use sdl2::Sdl;
+
+use crate::game::game_state::Repositories;
+use crate::game::graphics::model::camera::Camera;
+use crate::game::graphics::renderer::Renderer;
+
 pub mod model;
 pub mod ecs;
 mod renderer;
@@ -6,14 +17,6 @@ mod tilemap_2d_render;
 mod tilemap_3d_render;
 mod linemap_2d_render;
 mod linemap_3d_render;
-
-use std::cell::RefCell;
-use std::rc::Rc;
-use glm::vec2;
-use sdl2::Sdl;
-use crate::game::game_state::Repositories;
-use crate::game::graphics::model::camera::Camera;
-use crate::game::graphics::renderer::Renderer;
 
 #[must_use]
 pub struct Graphics {
@@ -28,12 +31,15 @@ impl Graphics {
 
         let video_subsystem = sdl_context.video().unwrap();
 
+        sdl2::image::init(InitFlag::PNG | InitFlag::JPG).unwrap();
+
         let window = video_subsystem.window("Raymarcher", 800, 600)
             .position_centered()
             .build()
             .unwrap();
 
         let canvas = window.into_canvas().build().unwrap();
+
         let canvas_ref = Rc::new(RefCell::new(canvas));
 
         log::info!("Initializing graphics module has been initialized");
@@ -68,7 +74,7 @@ pub struct RenderingState {
 impl RenderingState {
     pub fn new() -> Rc<RefCell<Self>> {
         let rendering_state = Self {
-            rendering_distance: 10.0,
+            rendering_distance: 7.0,
             total_columns: 120,
             camera: Camera::new(vec2(3.0, 3.0), 0.0f32, 90f32.to_radians())
         };
